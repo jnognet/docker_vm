@@ -11,6 +11,6 @@ RUN docker-php-ext-configure mbstring && docker-php-ext-install mbstring
 RUN docker-php-ext-configure intl && docker-php-ext-install intl
 RUN cd / && composer create-project codeigniter4/appstarter app && cd /app && composer update && composer install 
 
-FROM nginx:1.22.1
-COPY --from=build  /app/ /usr/share/nginx/html/app
-
+FROM php:7.4.33-apache-bullseye
+COPY --from=build  /app/ /var/www/html/app/
+RUN sed -i 's#DocumentRoot /var/www/html#DocumentRoot /var/www/html/app/public#' /etc/apache2/sites-enabled/000-default.conf 
