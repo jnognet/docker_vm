@@ -8,5 +8,5 @@ echo "##########################################################################
 sudo iptables -L -vn -t nat
 echo "###########################################################################################################################"
 sudo apt install net-tools
-netstat -atunp
+sudo netstat -atunp
 echo "ler: https://docs.docker.com/network/iptables/"
