@@ -1,0 +1,28 @@
+# https://docs.docker.com/engine/reference/builder/
+# https://docs.docker.com/build/building/multi-stage/
+
+FROM oraclelinux:8.5 AS common
+RUN dnf update -y
+RUN dnf install -y zip wget
+
+# https://github.com/spring-petclinic/spring-petclinic-rest
+FROM common AS prepare_backend
+RUN mkdir /app && cd /app && wget https://github.com/spring-petclinic/spring-petclinic-rest/archive/refs/heads/master.zip
+RUN cd /app && unzip master.zip && rm -f master.zip
+RUN cd /app/spring-petclinic-rest-master && sed -i '/<artifactId>spring-boot-starter-actuator<\/artifactId>/a <exclusions><exclusion><artifactId>logback-classic</artifactId><groupId>ch.qos.logback</groupId></exclusion><exclusion><artifactId>log4j-to-slf4j</artifactId><groupId>org.apache.logging.log4j</groupId></exclusion><exclusion><artifactId>spring-boot-starter-logging</artifactId><groupId>org.springframework.boot</groupId></exclusion></exclusions>' pom.xml
+RUN cd /app/spring-petclinic-rest-master && sed -i '/<artifactId>spring-boot-starter-data-jpa<\/artifactId>/a <exclusions><exclusion><artifactId>logback-classic</artifactId><groupId>ch.qos.logback</groupId></exclusion><exclusion><artifactId>log4j-to-slf4j</artifactId><groupId>org.apache.logging.log4j</groupId></exclusion><exclusion><artifactId>spring-boot-starter-logging</artifactId><groupId>org.springframework.boot</groupId></exclusion></exclusions>' pom.xml
+RUN cd /app/spring-petclinic-rest-master && sed -i '/<artifactId>spring-boot-starter-web<\/artifactId>/a <exclusions><exclusion><groupId>org.apache.tomcat.embed</groupId><artifactId>tomcat-embed-websocket</artifactId></exclusion></exclusions>' pom.xml
+RUN cd /app/spring-petclinic-rest-master && sed -i '/<\/properties>/a <packaging>war<\/packaging>' pom.xml
+
+FROM maven:3.8.5-openjdk-11 AS build
+COPY --from=prepare_backend /app /app
+RUN cd /app/spring-petclinic-rest-master && mvn package -e -X 
+
+FROM common AS server
+RUN mkdir /app && cd /app && wget https://github.com/wildfly/wildfly/releases/download/26.1.2.Final/wildfly-26.1.2.Final.zip && unzip wildfly-26.1.2.Final.zip && rm -f wildfly-26.1.2.Final.zip
+
+FROM openjdk:11-jdk-oraclelinux8 AS deploy
+COPY --from=server /app /app
+COPY --from=build  /app/spring-petclinic-rest-master/target/spring-petclinic-rest-2.6.2.war /app/wildfly-26.1.2.Final/standalone/deployments/spring-petclinic-rest.war
+ENTRYPOINT /app/wildfly-26.1.2.Final/bin/standalone.sh -b 0.0.0.0
+EXPOSE 8080

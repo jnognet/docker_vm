@@ -1,0 +1,18 @@
+version: "3"
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: app-test-backend:1.0
+    ports:
+      - "8080:8080"
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    depends_on:
+      - backend
+    image: app-test-frontend:1.0
+    ports: 
+      - "80:80"

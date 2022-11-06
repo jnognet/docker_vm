@@ -1,6 +1,6 @@
 version: "3"
 services:
-  nginx:
+  apache:
     build:
       context: ../022a_Dockerfile/
       dockerfile: Dockerfile
