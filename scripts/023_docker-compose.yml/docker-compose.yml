@@ -2,8 +2,8 @@ version: "3"
 services:
   nginx:
     build:
-      context: ../022a_Dockerfile/
+      context: .
       dockerfile: Dockerfile
     image: app-test:1.0
     ports:
-      - "80:80"
+      - "8080:8080"
