@@ -1,0 +1,20 @@
+# https://docs.docker.com/engine/reference/builder/
+# https://docs.docker.com/build/building/multi-stage/
+
+FROM oraclelinux:8.5 AS common
+RUN dnf update -y
+RUN dnf install -y zip wget
+
+# https://github.com/spring-petclinic/spring-petclinic-angular
+FROM common AS prepare_backend
+RUN mkdir /app && cd /app && wget https://github.com/spring-petclinic/spring-petclinic-angular/archive/refs/heads/master.zip
+RUN cd /app && unzip master.zip && rm -f master.zip
+RUN sed -i 's/http:\/\/localhost:9966\/petclinic\/api\//http:\/\/localhost:28080\/spring-petclinic-rest\/api\//' /app/spring-petclinic-angular-master/src/environments/environment.prod.ts
+
+FROM node:14.21.0-buster-slim AS build
+COPY --from=prepare_backend /app /app
+RUN npm install -g @angular/cli && cd /app/spring-petclinic-angular-master && npm install && ng build --prod
+
+FROM nginx:1.22.1
+COPY --from=build /app/spring-petclinic-angular-master/dist /usr/share/nginx/html
+EXPOSE 80

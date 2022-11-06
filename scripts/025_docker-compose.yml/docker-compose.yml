@@ -1,0 +1,34 @@
+version: "3"
+services:
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    image: app-test-db:1.0
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=senha
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: app-test-backend:1.0
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    depends_on:
+      - backend
+    image: app-test-frontend:1.0
+    ports: 
+      - "80:80"
+
+volumes:
+  mysql:
