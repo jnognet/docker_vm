@@ -17,4 +17,5 @@ RUN chown 33.33 -R /var/www/html/app
 RUN sed -i 's#DocumentRoot /var/www/html#DocumentRoot /var/www/html/app/public#' /etc/apache2/sites-enabled/000-default.conf
 RUN cp /var/www/html/app/env /var/www/html/app/.env
 RUN sed -i 's/# CI_ENVIRONMENT = production/CI_ENVIRONMENT = development/' /var/www/html/app/.env
-RUN ["/bin/sed", "-i", "s/# app.baseURL = ''/app.baseURL = 'http:\\/\\/localhost:20080'/", "/var/www/html/app/.env"]
+RUN ["/bin/sed", "-i", "s/# app[.]baseURL = ''/app.baseURL = 'http:\\/\\/localhost:20080'/", "/var/www/html/app/.env"]
+RUN ["/bin/sed", "-i", "s/# app[_]baseURL = ''/app_baseURL = 'http:\\/\\/localhost:20080'/", "/var/www/html/app/.env"]
