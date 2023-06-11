@@ -13,7 +13,7 @@ RUN dnf install -y zip wget
 
 # usando o Spring Initializr
 #FROM common AS create
-#RUN mkdir /app && cd /app && curl -G https://start.spring.io/starter.zip -d dependencies=web -d packaging=war -d javaVersion=17 -d type=maven-project -o demo.zip
+#RUN mkdir /app && cd /app && curl -G https://start.spring.io/starter.zip -d dependencies=web -d bootVersion=2.7.12 -d packaging=war -d javaVersion=17 -d type=maven-project -o demo.zip
 #RUN cd /app && unzip demo.zip && rm -f demo.zip
 #RUN sed -i '/<artifactId>spring-boot-starter-web<\/artifactId>/a <exclusions><exclusion><artifactId>logback-classic</artifactId><groupId>ch.qos.logback</groupId></exclusion><exclusion><artifactId>log4j-to-slf4j</artifactId><groupId>org.apache.logging.log4j</groupId></exclusion><exclusion><artifactId>spring-boot-starter-logging</artifactId><groupId>org.springframework.boot</groupId></exclusion></exclusions>' /app/pom.xml
 #RUN sed -i '/<dependencies>/a <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-thymeleaf</artifactId> <exclusions><exclusion><artifactId>logback-classic</artifactId><groupId>ch.qos.logback</groupId></exclusion><exclusion><artifactId>log4j-to-slf4j</artifactId><groupId>org.apache.logging.log4j</groupId></exclusion><exclusion><artifactId>spring-boot-starter-logging</artifactId><groupId>org.springframework.boot</groupId></exclusion></exclusions></dependency>' /app/pom.xml
@@ -23,7 +23,8 @@ RUN dnf install -y zip wget
 
 FROM maven:3.8.5-openjdk-17 AS build
 COPY --from=create /app /app
-RUN cd /app && mvn package -e -X
+RUN cd /app/demo && mvn package -e -X
+#RUN cd /app && mvn package -e -X
 
 FROM common AS server
 RUN mkdir /app && cd /app && wget https://github.com/wildfly/wildfly/releases/download/26.1.2.Final/wildfly-26.1.2.Final.zip && unzip wildfly-26.1.2.Final.zip && rm -f wildfly-26.1.2.Final.zip
