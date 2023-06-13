@@ -8,12 +8,12 @@ RUN dnf install -y zip wget git
 # https://github.com/spring-petclinic/spring-petclinic-angular
 FROM common AS prepare_backend
 RUN mkdir /app && cd /app && git clone https://github.com/spring-petclinic/spring-petclinic-angular.git
-RUN cd /app/spring-petclinic-angular && git checkout 8727baef7d40253222c080a76596ae3f44e7d40c
+RUN cd /app/spring-petclinic-angular && git checkout f1b95b4e62f93944b2abdb273f199dc5077f8e57
 RUN sed -i 's/http:\/\/localhost:9966\/petclinic\/api\//http:\/\/localhost:28080\/spring-petclinic-rest\/api\//' /app/spring-petclinic-angular-master/src/environments/environment.prod.ts
 
-FROM node:20.3.0 AS build
+FROM node:10 AS build
 COPY --from=prepare_backend /app /app
-RUN npm install -g @angular/cli@16.0.5 && cd /app/spring-petclinic-angular && npm install && ng build --prod
+RUN npm install -g @angular/cli@8.0.3  && cd /app/spring-petclinic-angular && npm audit fix && npm install && ng build --prod
 
 FROM nginx:1.22.1
 COPY --from=build /app/spring-petclinic-angular-master/dist /usr/share/nginx/html
