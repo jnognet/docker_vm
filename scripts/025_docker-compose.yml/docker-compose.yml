@@ -13,7 +13,7 @@ services:
       - MYSQL_ROOT_PASSWORD=senha
   backend:
     build:
-      context: ../024_docker-compose.yml
+      context: .
       dockerfile: Dockerfile.backend
     image: app-test-backend:1.0
     ports:
